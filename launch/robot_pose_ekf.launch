@@ -1,0 +1,36 @@
+<launch>
+
+  <param name="use_sim_time" value="true"/>
+
+  <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+    <param name="output_frame" value="odom_combine"/>
+    <param name="base_footprint_frame" value="base_footprint"/>
+    <param name="freq" value="30.0"/>
+    <param name="sensor_timeout" value="10.0"/>  
+    <param name="odom_used" value="false"/>
+    <param name="imu_used" value="true"/>
+    <param name="vo_used" value="true"/>
+
+    <remap from="vo" to="pose_vo" />
+  </node>
+
+  <node pkg="robot_pose_ekf" type="ekf.py" name="pose_vo" output="screen"/>
+
+  <!--node pkg="rosbag" type="play" name="rosbag" args="$(find robot_pose_ekf)/bags/_2020-03-02-15-30-29.bag" output="screen"/-->
+  
+  <node pkg="tf" type="static_transform_publisher" name="imu_robot_broadcaster" args="0 0 0 0 0 1.57 base_footprint imu 100" />
+  <node pkg="tf" type="static_transform_publisher" name="camera_imu_broadcaster" args="0 0 0 0 1.57 0 imu cam_0_optical_frame 100" />
+
+  <node pkg="imu_complementary_filter" type="complementary_filter_node"
+      name="complementary_filter_gain_node" output="screen">
+    <param name="do_bias_estimation" value="true"/>
+    <param name="do_adaptive_gain" value="true"/>
+    <param name="use_mag" value="false"/>
+    <param name="gain_acc" value="0.01"/>
+    <param name="fixed_frame" value="imu"/>
+    <remap from="imu/data_raw" to="mavros/imu/data_raw"/>
+  
+  </node>
+
+</launch>
+
