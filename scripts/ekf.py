@@ -15,6 +15,7 @@ import math
 RATE = 30
 IMU_SIGMA = 1e-4
 VO_SIGMA = 0.01
+END_TIME = 22
 
 class VO:
     def __init__(self):
@@ -68,20 +69,6 @@ class VO:
         self.start_vo = False
 
         self.finish = False
-        keyboard_listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
-        keyboard_listener.start() 
-
-    def is_space_key(self, key):
-        return key == keyboard.Key.space
-
-    # responds to keyboard events
-    def on_press(self, key):
-        if self.is_space_key(key):
-            pass
-
-    def on_release(self, key):
-        if self.is_space_key(key):
-            self.finish = True
 
     def path_callback(self, msg):
         if self.start_vo:
@@ -152,7 +139,7 @@ class VO:
             if not self.start_vo:
                 self.start_vo = True
                 self.vo_init_time = rospy.Time.now().to_sec()
-            if duration > 22:
+            if duration > END_TIME:
                 self.finish = True
 
         else: self.tag_exist = False
